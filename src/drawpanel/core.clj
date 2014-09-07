@@ -1,11 +1,9 @@
 (ns drawpanel.core
   (:gen-class)
-  (:require [quil.core :as q])
-  (:require [drawpanel.example :as examples])
-  (:require [clojure.string :as string]))
-
-(defn log [obj]
-  (println (str obj)))
+  (:require [quil.core :as q]
+            [drawpanel.logger :as logger]
+            [drawpanel.db :as db]
+            [clojure.string :as string]))
 
 (defn setup []
   (q/smooth)
@@ -25,11 +23,14 @@
   (q/unhex (string/replace hex "#" "")))
 
 (defn draw-action [action]
+  (logger/log "drawing action")
   (draw-line (:path action) (safe-color (:color action)) (:weight action)))
 
 (defn check-for-new-actions []
-  (log "Loading next actions")
-  (draw-action examples/sample-action))
+  (let [actions (db/new-actions)]
+    (logger/log "Got actions")
+    (map logger/log actions)
+    (map draw-action actions)))
 
 
 (defn -main [& args]
