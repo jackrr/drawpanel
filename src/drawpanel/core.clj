@@ -1,7 +1,8 @@
 (ns drawpanel.core
   (:gen-class)
   (:require [quil.core :as q])
-  (:require [drawpanel.example :as examples]))
+  (:require [drawpanel.example :as examples])
+  (:require [clojure.string :as string]))
 
 (defn log [obj]
   (println (str obj)))
@@ -11,13 +12,20 @@
   (q/background 255)
   (q/frame-rate 1))
 
-(defn draw-line [p1 p2 color weight]
+(defn p2p [p1 p2]
+  (if (vector? p2) (q/line p1 p2)))
+
+(defn draw-line [points color weight]
   (q/stroke color)
   (q/stroke-weight weight)
-  (q/line p1 p2))
+  (let [nums (map vector (iterate inc 0) points)]
+    (doseq [[idx value] nums] (p2p value (get points (inc idx))))))
+
+(defn safe-color [hex]
+  (q/unhex (string/replace hex "#" "")))
 
 (defn draw-action [action]
-  (draw-line (get (:path action) 0) (get (:path action) 1) (q/unhex (:color action)) (:weight action)))
+  (draw-line (:path action) (safe-color (:color action)) (:weight action)))
 
 (defn check-for-new-actions []
   (log "Loading next actions")
