@@ -10,8 +10,11 @@
   (q/background 255)
   (q/frame-rate 1))
 
+(defn parse-nums [vect]
+  (vector (read-string (get vect 0)) (read-string (get vect 1))))
+
 (defn p2p [p1 p2]
-  (if (vector? p2) (q/line p1 p2)))
+  (if (vector? p2) (q/line (parse-nums p1) (parse-nums p2))))
 
 (defn draw-line [points color weight]
   (q/stroke color)
@@ -23,14 +26,11 @@
   (q/unhex (string/replace hex "#" "")))
 
 (defn draw-action [action]
-  (logger/log "drawing action")
-  (draw-line (:path action) (safe-color (:color action)) (:weight action)))
+  (draw-line (:path action) (safe-color (:color action)) (read-string (:weight action))))
 
 (defn check-for-new-actions []
   (let [actions (db/new-actions)]
-    (logger/log "Got actions")
-    (map logger/log actions)
-    (map draw-action actions)))
+    (doseq [action actions] (draw-action action))))
 
 
 (defn -main [& args]
@@ -39,5 +39,4 @@
     :title "Display"
     :setup setup
     :draw check-for-new-actions
-    ; :size [(q/screen-width) (q/screen-height)]))
-    :size [500 500]))
+    :size [(q/screen-width) (q/screen-height)]))

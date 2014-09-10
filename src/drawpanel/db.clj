@@ -1,20 +1,20 @@
 (ns drawpanel.db
   (:require [monger.core :as mg]
             [monger.collection :as mc]
+            [monger.operators :refer :all]
+            [monger.conversion :refer [from-db-object]]
             [drawpanel.logger :as logger]))
 
 
 (def last-check (atom 0))
 
 (defn update-last-check []
-  (reset! last-check (quot (System/currentTimeMillis) 1000)))
+  (reset! last-check (System/currentTimeMillis)))
 
 (defn new-actions []
-  (let [t    (deref last-check)
+  (let [lt    (deref last-check)
         conn (mg/connect { :port 27017 })
-        db   (mg/get-db conn "draw-board")
-        actions (mc/find-maps db "draw-actions")]
+        db   (mg/get-db conn "drawBoard")
+        actions (mc/find-maps db "drawActions" { :createdAt { $gt lt }})]
     (update-last-check)
-    (logger/log actions)
     actions))
-    ; (mc/find-maps db coll { :createdAt { "$gt" t }})))
